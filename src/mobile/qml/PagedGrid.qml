@@ -21,8 +21,10 @@ Item {
     id: pagedGrid
 
     // Read/write properties.
-    property QtObject model: null
-    property Component delegate: null
+//    property QtObject model: null
+//    property Component delegate: null
+    property alias model: gridView.model
+    property alias delegate: gridView.delegate
     property Component emptyItemDelegate: null
     property int extraMargin: 40
     property int itemWidth: 192
@@ -39,7 +41,7 @@ Item {
     property int pageWidth: columnsPerPage * itemWidth + (columnsPerPage - 1) * spacing
     property int pageHeight: rowsPerPage * itemHeight + (rowsPerPage - 1) * spacing
     property int itemsPerPage: rowsPerPage * columnsPerPage
-    property alias pageCount: grid.pageCount
+    property alias pageCount: gridView.pageCount
 
     width: pagedGrid.pageWidth + 2 * extraMargin
     height: pagedGrid.pageHeight
@@ -49,20 +51,21 @@ Item {
     signal itemClicked(int index, int x, int y);
 
     function itemAt(index) {
-        return grid.itemAt(index)
+        return null//gridView.itemAt(index)
     }
 
     property int guidesOpacity: 0
 
     GridView {
-        id: grid
-        property int pageCount: 2
+        id: gridView
+        property int pageCount: model ? Math.ceil(gridView.count / itemsPerPage) : 0
         model: pagedGrid.model
         delegate: pagedGrid.delegate
         cellHeight: pagedGrid.itemHeight + pagedGrid.spacing
         cellWidth: pagedGrid.itemWidth + pagedGrid.spacing
         height: 2 * cellHeight
         width: 2 * cellWidth
+
         anchors {
             top: parent.top
             bottom: parent.bottom
@@ -71,11 +74,8 @@ Item {
             leftMargin: 40
             //rightMargin: 40
         }
-        flow: GridView.TopToBottom
-        interactive: false
-        Behavior on x {
-            NumberAnimation { duration: 100 }
-        }
+
+        onPageCountChanged: console.log('gridView.pageCount: ' + pageCount)
 
         footer: Rectangle {
             height: pagedGrid.itemHeight
@@ -84,25 +84,54 @@ Item {
             opacity: 0.3
         }
 
-        SwipeArea {
+        highlightFollowsCurrentItem: true
+        highlight: Component {
+            Rectangle {
+                width: gridView.cellWidth; height: gridView.cellHeight
+                color: "lightsteelblue"; radius: 5
+                x: gridView.currentItem.x
+                y: gridView.currentItem.y
+                Behavior on x { SpringAnimation { spring: 3; damping: 0.2 } }
+                Behavior on y { SpringAnimation { spring: 3; damping: 0.2 } }
+            }
+        }
+
+        flow: GridView.TopToBottom
+        interactive: true
+        /*SwipeArea {
             id: swipeArea
             anchors.fill: parent
             z: 1
 
             onClicked: {
                 console.log('clicked!')
+                var x = mouse.x
+                var y = mouse.y
+                var index = gridView.indexAt(x, y)
+                var foo = mapFromItem(gridView, x, y)
+                console.log('mapFromItem:' + foo)
+                var bar = mapToItem(gridView, x, y)
+                console.log('mapToItem:' + bar)
+                console.log(gridView.currentItem.x, gridView.currentItem.width)
+                console.log('indexAt(' + x + ', ' + y + '): ' + index)
             }
 
             onSwipeLeft: {
                 console.log('swipe left!')
-                grid.positionViewAtIndex(4, GridView.Beginning)
+                if (gridView.currentIndex + 4 > gridView.count)
+                    return;
+                gridView.currentIndex += 4
+                gridView.positionViewAtIndex(gridView.currentIndex, GridView.Beginning)
             }
 
             onSwipeRight: {
-                grid.positionViewAtIndex(0, GridView.Beginning)
                 console.log('swipe right!')
+                if (gridView.currentIndex === 0)
+                    return;
+                gridView.currentIndex -= 4
+                gridView.positionViewAtIndex(gridView.currentIndex, GridView.Beginning)
             }
-        }
+        }*/
     }
 
     Rectangle {

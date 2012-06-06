@@ -46,6 +46,8 @@ Item {
             verticalAlignment: Image.AlignBottom
             clip: true
 
+            opacity: GridView.isCurrentItem ? 1 : 0.4
+
             Text {
                 text: index + (pagedGrid.currentPage * 4) + 1
                 color: "#C1C2C3"
