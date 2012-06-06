@@ -41,8 +41,8 @@ Item {
     property int itemsPerPage: rowsPerPage * columnsPerPage
     property alias pageCount: grid.pageCount
 
-    width: grid.pageWidth + 2 * extraMargin
-    height: grid.pageHeight
+    width: pagedGrid.pageWidth + 2 * extraMargin
+    height: pagedGrid.pageHeight
     clip: true
 
     // x and y will be given in coordinates relative to the clicked item.
@@ -52,6 +52,67 @@ Item {
         return grid.itemAt(index)
     }
 
+    property int guidesOpacity: 0
+
+    GridView {
+        id: grid
+        property int pageCount: 2
+        model: pagedGrid.model
+        delegate: pagedGrid.delegate
+        cellHeight: pagedGrid.itemHeight + pagedGrid.spacing
+        cellWidth: pagedGrid.itemWidth + pagedGrid.spacing
+        height: 2 * cellHeight
+        width: 2 * cellWidth
+        anchors {
+            top: parent.top
+            bottom: parent.bottom
+            left: parent.left
+            right: parent.right
+            leftMargin: 40
+            //rightMargin: 40
+        }
+        flow: GridView.TopToBottom
+        interactive: false
+        Behavior on x {
+            NumberAnimation { duration: 100 }
+        }
+
+        footer: Rectangle {
+            height: pagedGrid.itemHeight
+            width: pagedGrid.itemWidth
+            color: 'red'
+            opacity: 0.3
+        }
+
+        SwipeArea {
+            id: swipeArea
+            anchors.fill: parent
+            z: 1
+
+            onClicked: {
+                console.log('clicked!')
+            }
+
+            onSwipeLeft: {
+                console.log('swipe left!')
+                grid.positionViewAtIndex(4, GridView.Beginning)
+            }
+
+            onSwipeRight: {
+                grid.positionViewAtIndex(0, GridView.Beginning)
+                console.log('swipe right!')
+            }
+        }
+    }
+
+    Rectangle {
+        color: 'yellow'
+        opacity: guidesOpacity
+        anchors.fill: parent
+    }
+
+
+    /*
     onPageCountChanged: {
         if (pageCount === currentPage && currentPage > 0)
             --currentPage;
@@ -74,7 +135,8 @@ Item {
             NumberAnimation { duration: 100 }
         }
     }
-
+    */
+    /*
     SwipeArea {
         id: swipeArea
         anchors.fill: parent
@@ -93,7 +155,7 @@ Item {
             if (x >= topLeftX && x <= bottomRightX && y >= topLeftY && y <= bottomRightY) {
                 var itemIndex = currentPage * grid.itemsPerPage + row * columnsPerPage + column
                 var item = grid.itemAt(itemIndex)
-                if (item != null) {
+                if (item !== null) {
                     // Emit a signal pointing the item clicked and the internal position of the click.
                     pagedGrid.itemClicked(itemIndex, x - topLeftX, y - topLeftY);
                 }
@@ -101,13 +163,18 @@ Item {
         }
 
         onSwipeLeft: {
-            if (currentPage < pageCount - 1)
-                ++currentPage;
+            console.log('swipe left!')
+            grid.positionViewAtIndex(4, GridView.Beginning)
+//            if (currentPage < pageCount - 1)
+//                ++currentPage;
         }
 
         onSwipeRight: {
-            if (currentPage > 0)
-                --currentPage;
+            grid.positionViewAtIndex(0, GridView.Beginning)
+            console.log('swipe right!')
+//            if (currentPage > 0)
+//                --currentPage;
         }
     }
+*/
 }
