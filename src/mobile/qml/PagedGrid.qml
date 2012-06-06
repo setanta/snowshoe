@@ -17,14 +17,14 @@
 import QtQuick 2.0
 import Snowshoe 1.0
 
-Item {
+GridView {
     id: pagedGrid
 
     // Read/write properties.
 //    property QtObject model: null
 //    property Component delegate: null
-    property alias model: gridView.model
-    property alias delegate: gridView.delegate
+    //property alias model: gridView.model
+    //property alias delegate: gridView.delegate
     property Component emptyItemDelegate: null
     property int extraMargin: 40
     property int itemWidth: 192
@@ -41,11 +41,11 @@ Item {
     property int pageWidth: columnsPerPage * itemWidth + (columnsPerPage - 1) * spacing
     property int pageHeight: rowsPerPage * itemHeight + (rowsPerPage - 1) * spacing
     property int itemsPerPage: rowsPerPage * columnsPerPage
-    property alias pageCount: gridView.pageCount
+    //property alias pageCount: gridView.pageCount
 
     width: pagedGrid.pageWidth + 2 * extraMargin
     height: pagedGrid.pageHeight
-    clip: true
+    clip: false
 
     // x and y will be given in coordinates relative to the clicked item.
     signal itemClicked(int index, int x, int y);
@@ -54,28 +54,33 @@ Item {
         return null//gridView.itemAt(index)
     }
 
-    property int guidesOpacity: 0
-
-    GridView {
-        id: gridView
-        property int pageCount: model ? Math.ceil(gridView.count / itemsPerPage) : 0
-        model: pagedGrid.model
+    //boundsBehavior: Flickable.StopAtBounds
+    //GridView {
+        //id: gridView
+        property int pageCount: model ? Math.ceil(pagedGrid.count / itemsPerPage) : 0
+        //model: pagedGrid.model
         delegate: pagedGrid.delegate
         cellHeight: pagedGrid.itemHeight + pagedGrid.spacing
         cellWidth: pagedGrid.itemWidth + pagedGrid.spacing
-        height: 2 * cellHeight
-        width: 2 * cellWidth
+        //height: 2 * cellHeight
+        //width: 2 * cellWidth
 
-        anchors {
+        contentHeight: height
+        contentWidth: width * pageCount
+
+
+        /*anchors {
             top: parent.top
             bottom: parent.bottom
             left: parent.left
             right: parent.right
             leftMargin: 40
             //rightMargin: 40
-        }
+        }*/
+        anchors.leftMargin: 40
+        anchors.rightMargin: 40
 
-        onPageCountChanged: console.log('gridView.pageCount: ' + pageCount)
+        onPageCountChanged: console.log('pagedGrid.pageCount: ' + pageCount)
 
         footer: Rectangle {
             height: pagedGrid.itemHeight
@@ -87,18 +92,18 @@ Item {
         highlightFollowsCurrentItem: true
         highlight: Component {
             Rectangle {
-                width: gridView.cellWidth; height: gridView.cellHeight
+                width: pagedGrid.cellWidth; height: pagedGrid.cellHeight
                 color: "lightsteelblue"; radius: 5
-                x: gridView.currentItem.x
-                y: gridView.currentItem.y
+                x: pagedGrid.currentItem.x
+                y: pagedGrid.currentItem.y
                 Behavior on x { SpringAnimation { spring: 3; damping: 0.2 } }
                 Behavior on y { SpringAnimation { spring: 3; damping: 0.2 } }
             }
         }
 
         flow: GridView.TopToBottom
-        interactive: true
-        /*SwipeArea {
+        interactive: false
+        SwipeArea {
             id: swipeArea
             anchors.fill: parent
             z: 1
@@ -107,33 +112,34 @@ Item {
                 console.log('clicked!')
                 var x = mouse.x
                 var y = mouse.y
-                var index = gridView.indexAt(x, y)
-                var foo = mapFromItem(gridView, x, y)
+                var index = pagedGrid.indexAt(x, y)
+                var foo = mapFromItem(pagedGrid, x, y)
                 console.log('mapFromItem:' + foo)
-                var bar = mapToItem(gridView, x, y)
+                var bar = mapToItem(pagedGrid, x, y)
                 console.log('mapToItem:' + bar)
-                console.log(gridView.currentItem.x, gridView.currentItem.width)
+                console.log(pagedGrid.currentItem.x, pagedGrid.currentItem.width)
                 console.log('indexAt(' + x + ', ' + y + '): ' + index)
             }
 
             onSwipeLeft: {
                 console.log('swipe left!')
-                if (gridView.currentIndex + 4 > gridView.count)
+                if (pagedGrid.currentIndex + 4 > pagedGrid.count)
                     return;
-                gridView.currentIndex += 4
-                gridView.positionViewAtIndex(gridView.currentIndex, GridView.Beginning)
+                pagedGrid.currentIndex += 4
+                pagedGrid.positionViewAtIndex(pagedGrid.currentIndex, GridView.Beginning)
             }
 
             onSwipeRight: {
                 console.log('swipe right!')
-                if (gridView.currentIndex === 0)
+                if (pagedGrid.currentIndex === 0)
                     return;
-                gridView.currentIndex -= 4
-                gridView.positionViewAtIndex(gridView.currentIndex, GridView.Beginning)
+                pagedGrid.currentIndex -= 4
+                pagedGrid.positionViewAtIndex(pagedGrid.currentIndex, GridView.Beginning)
             }
-        }*/
-    }
+        }
+    //}
 
+    property int guidesOpacity: 0
     Rectangle {
         color: 'yellow'
         opacity: guidesOpacity
