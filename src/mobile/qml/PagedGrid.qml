@@ -47,11 +47,21 @@ GridView {
     height: pagedGrid.pageHeight
     clip: false
 
+    // ???
+    //focus: true
+
+    snapMode: GridView.SnapToRow
+
     // x and y will be given in coordinates relative to the clicked item.
     signal itemClicked(int index, int x, int y);
 
     function itemAt(index) {
-        return null//gridView.itemAt(index)
+        for (var p in model)
+            console.log('model -- ' + p)
+        console.log(model.item(index))
+        return null//model.get(index)
+        //return null//gridView.itemAt(index)
+
     }
 
     //boundsBehavior: Flickable.StopAtBounds
@@ -67,7 +77,6 @@ GridView {
 
         contentHeight: height
         contentWidth: width * pageCount
-
 
         /*anchors {
             top: parent.top
@@ -89,17 +98,17 @@ GridView {
             opacity: 0.3
         }
 
-        highlightFollowsCurrentItem: true
-        highlight: Component {
-            Rectangle {
-                width: pagedGrid.cellWidth; height: pagedGrid.cellHeight
-                color: "lightsteelblue"; radius: 5
-                x: pagedGrid.currentItem.x
-                y: pagedGrid.currentItem.y
-                Behavior on x { SpringAnimation { spring: 3; damping: 0.2 } }
-                Behavior on y { SpringAnimation { spring: 3; damping: 0.2 } }
-            }
-        }
+//        highlightFollowsCurrentItem: true
+//        highlight: Component {
+//            Rectangle {
+//                width: pagedGrid.cellWidth; height: pagedGrid.cellHeight
+//                color: "lightsteelblue"; radius: 5
+//                x: pagedGrid.currentItem.x
+//                y: pagedGrid.currentItem.y
+//                Behavior on x { SpringAnimation { spring: 3; damping: 0.2 } }
+//                Behavior on y { SpringAnimation { spring: 3; damping: 0.2 } }
+//            }
+//        }
 
         flow: GridView.TopToBottom
         interactive: false
@@ -112,13 +121,9 @@ GridView {
                 console.log('clicked!')
                 var x = mouse.x
                 var y = mouse.y
-                var index = pagedGrid.indexAt(x, y)
-                var foo = mapFromItem(pagedGrid, x, y)
-                console.log('mapFromItem:' + foo)
-                var bar = mapToItem(pagedGrid, x, y)
-                console.log('mapToItem:' + bar)
-                console.log(pagedGrid.currentItem.x, pagedGrid.currentItem.width)
-                console.log('indexAt(' + x + ', ' + y + '): ' + index)
+                var itemIndex = pagedGrid.indexAt(pagedGrid.contentX + x, y)
+                console.log('index: ' + itemIndex)
+                pagedGrid.itemClicked(itemIndex, pagedGrid.contentX + x, y);
             }
 
             onSwipeLeft: {
